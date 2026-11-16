@@ -3,6 +3,7 @@ import sqlite3
 from flask import current_app, g
 
 
+<<<<<<< Updated upstream
 SEED_PRODUCTS = (
     (
         "AWP",
@@ -54,6 +55,13 @@ def get_db():
         g.db = sqlite3.connect(current_app.config["DATABASE"])
         g.db.row_factory = sqlite3.Row
         g.db.execute("PRAGMA foreign_keys = ON")
+=======
+def get_db():
+    """Return the SQLite connection for the current application context."""
+    if "db" not in g:
+        g.db = sqlite3.connect(current_app.config["DATABASE"])
+        g.db.row_factory = sqlite3.Row
+>>>>>>> Stashed changes
     return g.db
 
 
@@ -65,6 +73,7 @@ def close_db(_error=None):
 
 def init_app(app):
     app.teardown_appcontext(close_db)
+<<<<<<< Updated upstream
 
 
 def init_db():
@@ -217,3 +226,5 @@ def create_order(product_id, customer_name, customer_email, quantity):
     except Exception:
         db.rollback()
         raise
+=======
+>>>>>>> Stashed changes
