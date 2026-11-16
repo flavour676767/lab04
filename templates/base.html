@@ -56,6 +56,7 @@
                 <a href="{{ url_for('shop') }}" class="nav-link text-white transition-colors duration-300 hover:underline{% if request.endpoint == 'shop' %} active{% endif %}"{% if request.endpoint == 'shop' %} aria-current="page"{% endif %}>Магазин</a>
                 <a href="{{ url_for('about') }}" class="nav-link text-white transition-colors duration-300 hover:underline{% if request.endpoint == 'about' %} active{% endif %}"{% if request.endpoint == 'about' %} aria-current="page"{% endif %}>Про нас</a>
                 <a href="{{ url_for('contacts') }}" class="nav-link text-white transition-colors duration-300 hover:underline{% if request.endpoint == 'contacts' %} active{% endif %}"{% if request.endpoint == 'contacts' %} aria-current="page"{% endif %}>Зворотний зв'язок</a>
+                <a href="{{ url_for('admin_feedback') }}" class="nav-link text-white transition-colors duration-300 hover:underline{% if request.endpoint == 'admin_feedback' %} active{% endif %}"{% if request.endpoint == 'admin_feedback' %} aria-current="page"{% endif %}>Адмін</a>
             </div>
 
             <!-- Кнопка меню для мобільних пристроїв -->
@@ -73,10 +74,22 @@
             <a href="{{ url_for('shop') }}" class="nav-link block text-white py-2 transition duration-300 hover:translate-x-2{% if request.endpoint == 'shop' %} active{% endif %}"{% if request.endpoint == 'shop' %} aria-current="page"{% endif %}>Магазин</a>
             <a href="{{ url_for('about') }}" class="nav-link block text-white py-2 transition duration-300 hover:translate-x-2{% if request.endpoint == 'about' %} active{% endif %}"{% if request.endpoint == 'about' %} aria-current="page"{% endif %}>Про нас</a>
             <a href="{{ url_for('contacts') }}" class="nav-link block text-white py-2 transition duration-300 hover:translate-x-2{% if request.endpoint == 'contacts' %} active{% endif %}"{% if request.endpoint == 'contacts' %} aria-current="page"{% endif %}>Зворотний зв'язок</a>
+            <a href="{{ url_for('admin_feedback') }}" class="nav-link block text-white py-2 transition duration-300 hover:translate-x-2{% if request.endpoint == 'admin_feedback' %} active{% endif %}"{% if request.endpoint == 'admin_feedback' %} aria-current="page"{% endif %}>Адмін</a>
         </div>
     </nav>
 
     <main class="container mx-auto mt-8 p-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-6 space-y-2" aria-live="polite">
+                    {% for category, message in messages %}
+                        <p class="rounded-lg border px-4 py-3 {% if category == 'error' %}border-red-300 bg-red-50 text-red-800{% else %}border-green-300 bg-green-50 text-green-800{% endif %}">
+                            {{ message }}
+                        </p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
         {% block content %}{% endblock %}
     </main>
 

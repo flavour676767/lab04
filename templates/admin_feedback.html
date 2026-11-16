@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Адмін-панель — відгуки{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-6xl">
+    <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+            <p class="mb-2 text-sm font-semibold uppercase tracking-widest text-gray-500">LOQ Market</p>
+            <h1 class="text-3xl font-bold text-gray-900">Відгуки користувачів</h1>
+        </div>
+        <span class="rounded-full bg-gray-200 px-3 py-1 text-sm text-gray-700">
+            Усього: {{ feedback_entries|length }}
+        </span>
+    </div>
+
+    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        {% if feedback_entries %}
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse text-left">
+                    <thead class="bg-gray-50 text-sm text-gray-600">
+                        <tr>
+                            <th class="px-4 py-3">Дата</th>
+                            <th class="px-4 py-3">Ім’я</th>
+                            <th class="px-4 py-3">Email</th>
+                            <th class="px-4 py-3">Повідомлення</th>
+                            <th class="px-4 py-3 text-right">Дія</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for entry in feedback_entries %}
+                            <tr class="align-top">
+                                <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-500">{{ entry['created_at'] }}</td>
+                                <td class="px-4 py-4 font-semibold text-gray-900">{{ entry['name'] }}</td>
+                                <td class="px-4 py-4 text-gray-700">{{ entry['email'] }}</td>
+                                <td class="max-w-xl whitespace-pre-wrap px-4 py-4 text-gray-700">{{ entry['message'] }}</td>
+                                <td class="px-4 py-4 text-right">
+                                    <form method="post"
+                                          action="{{ url_for('admin_delete_feedback', feedback_id=entry['id']) }}"
+                                          onsubmit="return confirm('Видалити цей відгук?');">
+                                        <button type="submit" class="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700">
+                                            Видалити
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="p-10 text-center">
+                <h2 class="mb-2 text-xl font-semibold text-gray-900">Поки що відгуків немає</h2>
+                <p class="text-gray-600">Нові повідомлення з’являться тут після надсилання форми зворотного зв’язку.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
