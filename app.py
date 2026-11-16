@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 from pathlib import Path
-from models import get_db, init_app
+from models import get_db, init_app, init_db
 
 app = Flask(__name__)
 
@@ -33,6 +33,7 @@ init_app(app)
 # Створює файл БД, якщо його ще немає
 with app.app_context():
     get_db()
+    init_db()
 
 if __name__ == '__main__':
     # debug=True: автоматичний перезапуск після змін у коді та детальні повідомлення про помилки.
