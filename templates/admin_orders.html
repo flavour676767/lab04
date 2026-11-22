@@ -1,10 +1,106 @@
 {% extends "base.html" %}
+
 {% block title %}Адмін-панель — замовлення{% endblock %}
+
 {% block content %}
-<section class="mx-auto max-w-7xl">
-  <div class="mb-6 flex flex-wrap items-end justify-between gap-3"><div><p class="mb-2 text-sm font-semibold uppercase tracking-widest text-gray-500">LOQ Market · Адмін</p><h1 class="text-3xl font-bold text-gray-900">Керування замовленнями</h1></div><nav class="flex gap-3 text-sm font-semibold"><a class="underline" href="{{ url_for('admin_products') }}">Товари</a><a class="underline" href="{{ url_for('admin_feedback') }}">Відгуки</a></nav></div>
-  <div class="overflow-x-auto rounded-xl border bg-white"><table class="w-full text-left"><thead class="bg-gray-50 text-sm"><tr><th class="p-3">№ / Дата</th><th class="p-3">Клієнт</th><th class="p-3">Товари</th><th class="p-3">Сума</th><th class="p-3">Статус</th><th class="p-3">Оновити</th></tr></thead><tbody class="divide-y">
-  {% for order in orders %}<tr class="align-top"><td class="whitespace-nowrap p-3">#{{ order['id'] }}<div class="text-xs text-gray-500">{{ order['created_at'] }}</div></td><td class="p-3">{{ order['customer_name'] }}<div class="text-sm text-gray-500">{{ order['customer_email'] }}</div></td><td class="p-3">{{ order['items'] or '—' }}</td><td class="whitespace-nowrap p-3">${{ '%.2f'|format(order['total_price']) }}</td><td class="p-3">{{ status_labels[order['status']] }}</td><td class="p-3"><form method="post" action="{{ url_for('admin_order_status', order_id=order['id']) }}" class="flex gap-2"><select name="status" class="rounded border px-2 py-2">{% for status in statuses %}<option value="{{ status }}" {% if status == order['status'] %}selected{% endif %}>{{ status_labels[status] }}</option>{% endfor %}</select><button class="rounded bg-gray-900 px-3 py-2 text-sm font-semibold text-white">Зберегти</button></form></td></tr>{% else %}<tr><td colspan="6" class="p-8 text-center text-gray-500">Замовлень ще немає.</td></tr>{% endfor %}
-  </tbody></table></div>
+<section class="mx-auto max-w-6xl space-y-6">
+    <div class="flex flex-wrap items-end justify-between gap-4 border-b border-gray-200 pb-5">
+        <div>
+            <p class="mb-1 text-sm font-semibold uppercase tracking-wider text-gray-500">LOQ Market · Адмін</p>
+            <h1 class="text-3xl font-bold text-gray-900">Керування замовленнями</h1>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+            <span class="rounded-full bg-gray-200 px-3 py-1 text-sm text-gray-700">
+                Усього: {{ orders|length }}
+            </span>
+            <nav class="flex flex-wrap gap-2 text-sm font-semibold">
+                <a href="{{ url_for('admin_products') }}" class="rounded-lg px-4 py-2 transition bg-gray-100 text-gray-700 hover:bg-gray-200">
+                    Товари
+                </a>
+                <a href="{{ url_for('admin_users') }}" class="rounded-lg px-4 py-2 transition bg-gray-100 text-gray-700 hover:bg-gray-200">
+                    Користувачі
+                </a>
+                <a href="{{ url_for('admin_orders') }}" class="rounded-lg px-4 py-2 transition bg-black text-yellow-400">
+                    Замовлення
+                </a>
+                <a href="{{ url_for('admin_feedback') }}" class="rounded-lg px-4 py-2 transition bg-gray-100 text-gray-700 hover:bg-gray-200">
+                    Відгуки
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        {% if orders %}
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse text-left">
+                    <thead class="bg-gray-50 text-sm text-gray-600">
+                        <tr>
+                            <th class="px-4 py-3">№ / Дата</th>
+                            <th class="px-4 py-3">Клієнт</th>
+                            <th class="px-4 py-3">Товари</th>
+                            <th class="px-4 py-3">Сума ($)</th>
+                            <th class="px-4 py-3">Статус</th>
+                            <th class="px-4 py-3 text-right">Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for order in orders %}
+                            <tr class="align-top hover:bg-gray-50/50">
+                                <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold text-gray-900">
+                                    #{{ order['id'] }}
+                                    <div class="text-xs font-normal text-gray-500">{{ order['created_at'] }}</div>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div class="font-semibold text-gray-900">{{ order['customer_name'] }}</div>
+                                    <div class="text-sm text-gray-500">{{ order['customer_email'] }}</div>
+                                </td>
+                                <td class="px-4 py-4 text-sm text-gray-700">{{ order['items'] or '—' }}</td>
+                                <td class="whitespace-nowrap px-4 py-4 text-sm font-bold text-gray-900">
+                                    ${{ '%.2f'|format(order['total_price']) }}
+                                </td>
+                                <td class="px-4 py-4">
+                                    <span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold
+                                        {% if order['status'] == 'completed' %}bg-green-100 text-green-800
+                                        {% elif order['status'] == 'processing' %}bg-yellow-100 text-yellow-800
+                                        {% elif order['status'] == 'shipped' %}bg-indigo-100 text-indigo-800
+                                        {% elif order['status'] == 'cancelled' %}bg-red-100 text-red-800
+                                        {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                        {{ status_labels[order['status']] }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <form method="post" action="{{ url_for('admin_order_status', order_id=order['id']) }}" class="flex gap-1">
+                                            <select name="status" class="rounded-md border border-gray-300 bg-white px-2 py-1.5 text-xs focus:border-gray-900 focus:outline-none">
+                                                {% for status in statuses %}
+                                                    <option value="{{ status }}" {% if status == order['status'] %}selected{% endif %}>
+                                                        {{ status_labels[status] }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="submit" class="rounded-md bg-gray-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800">
+                                                Оновити
+                                            </button>
+                                        </form>
+                                        <form method="post" action="{{ url_for('admin_delete_order', order_id=order['id']) }}" onsubmit="return confirm('Видалити замовлення #{{ order.id }}?');">
+                                            <button type="submit" class="rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700">
+                                                Видалити
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="p-10 text-center">
+                <h2 class="mb-2 text-xl font-semibold text-gray-900">Поки що замовлень немає</h2>
+                <p class="text-gray-600">Нові замовлення з'являться тут після оформлення в магазині.</p>
+            </div>
+        {% endif %}
+    </div>
 </section>
 {% endblock %}

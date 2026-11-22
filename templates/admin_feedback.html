@@ -4,14 +4,30 @@
 
 {% block content %}
 <section class="mx-auto max-w-6xl">
-    <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <div class="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-gray-200 pb-5">
         <div>
-            <p class="mb-2 text-sm font-semibold uppercase tracking-widest text-gray-500">LOQ Market</p>
+            <p class="mb-1 text-sm font-semibold uppercase tracking-wider text-gray-500">LOQ Market · Адмін</p>
             <h1 class="text-3xl font-bold text-gray-900">Відгуки користувачів</h1>
         </div>
-        <span class="rounded-full bg-gray-200 px-3 py-1 text-sm text-gray-700">
-            Усього: {{ feedback_entries|length }}
-        </span>
+        <div class="flex flex-wrap items-center gap-3">
+            <span class="rounded-full bg-gray-200 px-3 py-1 text-sm text-gray-700">
+                Усього: {{ feedback_entries|length }}
+            </span>
+            <nav class="flex flex-wrap gap-2 text-sm font-semibold">
+                <a href="{{ url_for('admin_products') }}" class="rounded-lg px-4 py-2 transition bg-gray-100 text-gray-700 hover:bg-gray-200">
+                    Товари
+                </a>
+                <a href="{{ url_for('admin_users') }}" class="rounded-lg px-4 py-2 transition bg-gray-100 text-gray-700 hover:bg-gray-200">
+                    Користувачі
+                </a>
+                <a href="{{ url_for('admin_orders') }}" class="rounded-lg px-4 py-2 transition bg-gray-100 text-gray-700 hover:bg-gray-200">
+                    Замовлення
+                </a>
+                <a href="{{ url_for('admin_feedback') }}" class="rounded-lg px-4 py-2 transition bg-black text-yellow-400">
+                    Відгуки
+                </a>
+            </nav>
+        </div>
     </div>
 
     <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -29,7 +45,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         {% for entry in feedback_entries %}
-                            <tr class="align-top">
+                            <tr class="align-top hover:bg-gray-50/50">
                                 <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-500">{{ entry['created_at'] }}</td>
                                 <td class="px-4 py-4 font-semibold text-gray-900">{{ entry['name'] }}</td>
                                 <td class="px-4 py-4 text-gray-700">{{ entry['email'] }}</td>

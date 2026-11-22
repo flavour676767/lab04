@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block title %}Адмін-панель — користувачі{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-6xl space-y-6">
+    <div class="flex flex-wrap items-end justify-between gap-4 border-b border-gray-200 pb-5">
+        <div>
+            <p class="mb-1 text-sm font-semibold uppercase tracking-wider text-gray-500">LOQ Market · Адмін</p>
+            <h1 class="text-3xl font-bold text-gray-900">Керування користувачами</h1>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+            <span class="rounded-full bg-gray-200 px-3 py-1 text-sm text-gray-700">
+                Усього: {{ users|length }}
+            </span>
+            <nav class="flex flex-wrap gap-2 text-sm font-semibold">
+                <a href="{{ url_for('admin_products') }}" class="rounded-lg px-4 py-2 transition bg-gray-100 text-gray-700 hover:bg-gray-200">
+                    Товари
+                </a>
+                <a href="{{ url_for('admin_users') }}" class="rounded-lg px-4 py-2 transition bg-black text-yellow-400">
+                    Користувачі
+                </a>
+                <a href="{{ url_for('admin_orders') }}" class="rounded-lg px-4 py-2 transition bg-gray-100 text-gray-700 hover:bg-gray-200">
+                    Замовлення
+                </a>
+                <a href="{{ url_for('admin_feedback') }}" class="rounded-lg px-4 py-2 transition bg-gray-100 text-gray-700 hover:bg-gray-200">
+                    Відгуки
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Форма додавання нового користувача -->
+    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <h2 class="mb-4 text-lg font-bold text-gray-900">Додати нового користувача</h2>
+        <form method="post" action="{{ url_for('admin_save_user') }}" class="grid grid-cols-1 gap-3 md:grid-cols-5">
+            <input type="hidden" name="user_id" value="">
+            <div class="md:col-span-2">
+                <input name="name" required maxlength="100" placeholder="Ім'я користувача" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none">
+            </div>
+            <div class="md:col-span-2">
+                <input name="email" required type="email" maxlength="120" placeholder="Електронна пошта" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none">
+            </div>
+            <div class="md:col-span-1">
+                <button type="submit" class="w-full rounded-md bg-yellow-400 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-yellow-500">
+                    Додати користувача
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Таблиця користувачів та їхніх замовлень -->
+    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        {% if users %}
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse text-left">
+                    <thead class="bg-gray-50 text-sm text-gray-600">
+                        <tr>
+                            <th class="px-4 py-3">ID / Дата</th>
+                            <th class="px-4 py-3 w-64">Користувач</th>
+                            <th class="px-4 py-3">Замовлення</th>
+                            <th class="px-4 py-3 text-right">Дія</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for user in users %}
+                            {% set user_form_id = 'user-form-' ~ user.id %}
+                            <tr class="align-top hover:bg-gray-50/50">
+                                <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold text-gray-900">
+                                    #{{ user.id }}
+                                    <div class="text-xs font-normal text-gray-500">{{ user.created_at }}</div>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <form id="{{ user_form_id }}" method="post" action="{{ url_for('admin_save_user') }}" class="space-y-2">
+                                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-500 mb-0.5">Ім'я</label>
+                                            <input name="name" value="{{ user.name }}" required class="w-full rounded-md border border-gray-300 px-2.5 py-1.5 text-sm font-medium text-gray-900 focus:border-gray-900 focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-500 mb-0.5">Email</label>
+                                            <input name="email" type="email" value="{{ user.email }}" required class="w-full rounded-md border border-gray-300 px-2.5 py-1.5 text-sm text-gray-700 focus:border-gray-900 focus:outline-none">
+                                        </div>
+                                        <div class="pt-1">
+                                            <button type="submit" class="rounded-md bg-gray-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800">
+                                                Зберегти дані
+                                            </button>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div class="mb-2 flex items-center gap-2">
+                                        <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-700">
+                                            Замовлень: {{ user.orders_count }}
+                                        </span>
+                                        <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-700">
+                                            Загальна сума: ${{ '%.2f'|format(user.total_spent) }}
+                                        </span>
+                                    </div>
+
+                                    {% if user.orders %}
+                                        <div class="space-y-3">
+                                            {% for order in user.orders %}
+                                                <div class="rounded-lg border border-gray-200 bg-gray-50/60 p-3 text-sm">
+                                                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="font-semibold text-gray-900">№{{ order.id }}</span>
+                                                            <span class="text-xs text-gray-500">{{ order.created_at }}</span>
+                                                            <span class="text-xs font-bold text-gray-900">${{ '%.2f'|format(order.total_price) }}</span>
+                                                            <span class="inline-block rounded-full px-2 py-0.5 text-xs font-semibold
+                                                                {% if order.status == 'completed' %}bg-green-100 text-green-800
+                                                                {% elif order.status == 'processing' %}bg-yellow-100 text-yellow-800
+                                                                {% elif order.status == 'shipped' %}bg-indigo-100 text-indigo-800
+                                                                {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                                                {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                                                {{ status_labels[order.status] }}
+                                                            </span>
+                                                        </div>
+
+                                                        <!-- Швидка зміна статусу -->
+                                                        <div class="flex items-center gap-1">
+                                                            <form method="post" action="{{ url_for('admin_order_status', order_id=order.id) }}" class="flex items-center gap-1">
+                                                                <input type="hidden" name="redirect_to" value="admin_users">
+                                                                <select name="status" class="rounded-md border border-gray-300 bg-white px-2 py-1 text-xs focus:border-gray-900 focus:outline-none">
+                                                                    {% for st in statuses %}
+                                                                        <option value="{{ st }}" {% if st == order.status %}selected{% endif %}>{{ status_labels[st] }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                                <button type="submit" class="rounded-md bg-gray-900 px-2.5 py-1 text-xs font-semibold text-white hover:bg-gray-800">
+                                                                    Оновити
+                                                                </button>
+                                                            </form>
+                                                            <form method="post" action="{{ url_for('admin_delete_order', order_id=order.id) }}" onsubmit="return confirm('Видалити замовлення №{{ order.id }}?');">
+                                                                <input type="hidden" name="redirect_to" value="admin_users">
+                                                                <button type="submit" class="rounded-md bg-red-100 px-2 py-1 text-xs font-semibold text-red-700 hover:bg-red-200">
+                                                                    Видалити
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="text-xs text-gray-700 mb-2">
+                                                        <span class="font-medium text-gray-500">Склад:</span> {{ order.items_text }}
+                                                    </div>
+
+                                                    <!-- Форма редагування замовлення -->
+                                                    <details class="group mt-2 border-t border-gray-200 pt-2 text-xs">
+                                                        <summary class="cursor-pointer font-medium text-blue-600 hover:text-blue-800 select-none">
+                                                            Редагувати параметри замовлення
+                                                        </summary>
+                                                        <form method="post" action="{{ url_for('admin_edit_order', order_id=order.id) }}" class="mt-2 space-y-2 border-t border-gray-200 pt-2">
+                                                            <input type="hidden" name="redirect_to" value="admin_users">
+                                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                                <div>
+                                                                    <label class="block text-gray-500 mb-0.5">Товар</label>
+                                                                    <select name="product_id" class="w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 focus:border-gray-900 focus:outline-none">
+                                                                        {% for p in products %}
+                                                                            <option value="{{ p.id }}" {% if order.items_list and order.items_list[0].product_id == p.id %}selected{% endif %}>
+                                                                                {{ p.weapon }} | {{ p.skin }} (${{ '%.2f'|format(p.price) }})
+                                                                            </option>
+                                                                        {% endfor %}
+                                                                    </select>
+                                                                </div>
+                                                                <div>
+                                                                    <label class="block text-gray-500 mb-0.5">Кількість</label>
+                                                                    <input type="number" min="1" name="quantity" value="{{ order.items_list[0].quantity if order.items_list else 1 }}" class="w-full rounded-md border border-gray-300 px-2 py-1.5 focus:border-gray-900 focus:outline-none">
+                                                                </div>
+                                                                <div>
+                                                                    <label class="block text-gray-500 mb-0.5">Сума, $ (залиште порожнім для авторозрахунку)</label>
+                                                                    <input type="number" step="0.01" min="0" name="total_price" value="{{ order.total_price }}" class="w-full rounded-md border border-gray-300 px-2 py-1.5 focus:border-gray-900 focus:outline-none">
+                                                                </div>
+                                                                <div>
+                                                                    <label class="block text-gray-500 mb-0.5">Статус</label>
+                                                                    <select name="status" class="w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 focus:border-gray-900 focus:outline-none">
+                                                                        {% for st in statuses %}
+                                                                            <option value="{{ st }}" {% if order.status == st %}selected{% endif %}>{{ status_labels[st] }}</option>
+                                                                        {% endfor %}
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="pt-1">
+                                                                <button type="submit" class="rounded-md bg-gray-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800">
+                                                                    Зберегти зміни замовлення
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </details>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <p class="text-xs text-gray-500 mb-2">Замовлень немає.</p>
+                                    {% endif %}
+
+                                    <!-- Створення нового замовлення для користувача -->
+                                    <details class="group mt-3 rounded-lg border border-gray-200 bg-gray-50/60 p-2.5 text-xs">
+                                        <summary class="cursor-pointer font-medium text-gray-700 hover:text-gray-900 select-none">
+                                            Оформити нове замовлення
+                                        </summary>
+                                        <form method="post" action="{{ url_for('admin_create_user_order', user_id=user.id) }}" class="mt-2 space-y-2 border-t border-gray-200 pt-2">
+                                            <div>
+                                                <label class="block text-gray-500 mb-0.5">Товар</label>
+                                                <select name="product_id" required class="w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 focus:border-gray-900 focus:outline-none">
+                                                    {% for p in products %}
+                                                        <option value="{{ p.id }}">{{ p.weapon }} | {{ p.skin }} — ${{ '%.2f'|format(p.price) }} (залишок: {{ p.stock }})</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label class="block text-gray-500 mb-0.5">Кількість</label>
+                                                    <input type="number" name="quantity" min="1" value="1" required class="w-full rounded-md border border-gray-300 px-2 py-1.5 focus:border-gray-900 focus:outline-none">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-gray-500 mb-0.5">Статус</label>
+                                                    <select name="status" class="w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 focus:border-gray-900 focus:outline-none">
+                                                        {% for st in statuses %}
+                                                            <option value="{{ st }}">{{ status_labels[st] }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="w-full rounded-md bg-yellow-400 px-3 py-1.5 text-xs font-semibold text-gray-900 hover:bg-yellow-500">
+                                                Додати замовлення
+                                            </button>
+                                        </form>
+                                    </details>
+                                </td>
+                                <td class="px-4 py-4 text-right">
+                                    <form method="post" action="{{ url_for('admin_delete_user', user_id=user.id) }}" onsubmit="return confirm('Видалити користувача {{ user.name }} та всі його замовлення?');">
+                                        <button type="submit" class="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700">
+                                            Видалити
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="p-10 text-center">
+                <h2 class="mb-2 text-xl font-semibold text-gray-900">Поки що користувачів немає</h2>
+                <p class="text-gray-600">Нові користувачі з’являться тут після реєстрації або додавання за допомогою форми вище.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

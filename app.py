@@ -4,8 +4,9 @@ from flask import Flask, abort, flash, redirect, render_template, request, url_f
 
 from models import (
     ORDER_STATUSES, STATUS_LABELS, create_feedback, create_order, delete_feedback,
-    delete_product, get_all_feedback, get_db, get_orders, get_product,
-    get_products, init_app, init_db, save_product, update_order_status,
+    delete_order, delete_product, delete_user, get_all_feedback, get_db,
+    get_orders, get_product, get_products, get_user, get_users, init_app,
+    init_db, save_product, save_user, update_order, update_order_status,
 )
 
 app = Flask(__name__)
@@ -95,18 +96,109 @@ def admin_delete_product(product_id):
     return redirect(url_for("admin_products"))
 
 
+@app.route("/admin/users")
+def admin_users():
+    return render_template(
+        "admin_users.html",
+        users=get_users(),
+        products=get_products(),
+        statuses=ORDER_STATUSES,
+        status_labels=STATUS_LABELS,
+    )
+
+
+@app.post("/admin/users/save")
+def admin_save_user():
+    user_id = request.form.get("user_id", "").strip()
+    name = request.form.get("name", "").strip()
+    email = request.form.get("email", "").strip()
+    try:
+        uid = int(user_id) if user_id else None
+        save_user(uid, name, email)
+        flash("Дані користувача збережено.", "success")
+    except ValueError as error:
+        flash(str(error), "error")
+    return redirect(url_for("admin_users"))
+
+
+@app.post("/admin/users/<int:user_id>/delete")
+def admin_delete_user(user_id):
+    if delete_user(user_id):
+        flash("Користувача та його замовлення видалено.", "success")
+    else:
+        flash("Користувача не знайдено.", "error")
+    return redirect(url_for("admin_users"))
+
+
+@app.post("/admin/users/<int:user_id>/orders/create")
+def admin_create_user_order(user_id):
+    product_id = request.form.get("product_id", "").strip()
+    quantity = request.form.get("quantity", "").strip()
+    status = request.form.get("status", "pending").strip()
+    try:
+        p_id = int(product_id)
+        qty = int(quantity)
+        order_id = create_order(p_id, "", "", qty, user_id=user_id, status=status)
+        flash(f"Замовлення №{order_id} для користувача створено.", "success")
+    except (ValueError, TypeError) as error:
+        flash(str(error), "error")
+    return redirect(url_for("admin_users"))
+
+
 @app.route("/admin/orders")
 def admin_orders():
-    return render_template("admin_orders.html", orders=get_orders(), statuses=ORDER_STATUSES, status_labels=STATUS_LABELS)
+    return render_template(
+        "admin_orders.html",
+        orders=get_orders(),
+        products=get_products(),
+        statuses=ORDER_STATUSES,
+        status_labels=STATUS_LABELS,
+    )
 
 
 @app.post("/admin/orders/<int:order_id>/status")
 def admin_order_status(order_id):
+    redirect_to = request.form.get("redirect_to", "admin_orders")
     try:
         updated = update_order_status(order_id, request.form.get("status", ""))
         flash("Статус замовлення оновлено." if updated else "Замовлення не знайдено.", "success" if updated else "error")
     except ValueError as error:
         flash(str(error), "error")
+    if redirect_to == "admin_users":
+        return redirect(url_for("admin_users"))
+    return redirect(url_for("admin_orders"))
+
+
+@app.post("/admin/orders/<int:order_id>/edit")
+def admin_edit_order(order_id):
+    product_id = request.form.get("product_id", "").strip()
+    quantity = request.form.get("quantity", "").strip()
+    total_price = request.form.get("total_price", "").strip()
+    status = request.form.get("status", "").strip()
+    redirect_to = request.form.get("redirect_to", "admin_orders")
+    try:
+        p_id = int(product_id) if product_id else None
+        qty = int(quantity) if quantity else None
+        price = float(total_price) if total_price else None
+        update_order(order_id, product_id=p_id, quantity=qty, total_price=price, status=status)
+        flash(f"Замовлення №{order_id} оновлено.", "success")
+    except (ValueError, TypeError) as error:
+        flash(str(error), "error")
+
+    if redirect_to == "admin_users":
+        return redirect(url_for("admin_users"))
+    return redirect(url_for("admin_orders"))
+
+
+@app.post("/admin/orders/<int:order_id>/delete")
+def admin_delete_order(order_id):
+    redirect_to = request.form.get("redirect_to", "admin_orders")
+    if delete_order(order_id):
+        flash("Замовлення видалено.", "success")
+    else:
+        flash("Замовлення не знайдено.", "error")
+    if redirect_to == "admin_users":
+        return redirect(url_for("admin_users"))
     return redirect(url_for("admin_orders"))
 
 
