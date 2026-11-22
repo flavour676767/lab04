@@ -56,7 +56,7 @@
                 <a href="{{ url_for('shop') }}" class="nav-link text-white transition-colors duration-300 hover:underline{% if request.endpoint == 'shop' %} active{% endif %}"{% if request.endpoint == 'shop' %} aria-current="page"{% endif %}>Магазин</a>
                 <a href="{{ url_for('about') }}" class="nav-link text-white transition-colors duration-300 hover:underline{% if request.endpoint == 'about' %} active{% endif %}"{% if request.endpoint == 'about' %} aria-current="page"{% endif %}>Про нас</a>
                 <a href="{{ url_for('contacts') }}" class="nav-link text-white transition-colors duration-300 hover:underline{% if request.endpoint == 'contacts' %} active{% endif %}"{% if request.endpoint == 'contacts' %} aria-current="page"{% endif %}>Зворотний зв'язок</a>
-                <a href="{{ url_for('admin_feedback') }}" class="nav-link text-white transition-colors duration-300 hover:underline{% if request.endpoint == 'admin_feedback' %} active{% endif %}"{% if request.endpoint == 'admin_feedback' %} aria-current="page"{% endif %}>Адмін</a>
+                <a href="{{ url_for('admin_products') }}" class="nav-link text-white transition-colors duration-300 hover:underline{% if request.endpoint.startswith('admin_') %} active{% endif %}"{% if request.endpoint.startswith('admin_') %} aria-current="page"{% endif %}>Адмін</a>
             </div>
 
             <!-- Кнопка меню для мобільних пристроїв -->
@@ -74,7 +74,7 @@
             <a href="{{ url_for('shop') }}" class="nav-link block text-white py-2 transition duration-300 hover:translate-x-2{% if request.endpoint == 'shop' %} active{% endif %}"{% if request.endpoint == 'shop' %} aria-current="page"{% endif %}>Магазин</a>
             <a href="{{ url_for('about') }}" class="nav-link block text-white py-2 transition duration-300 hover:translate-x-2{% if request.endpoint == 'about' %} active{% endif %}"{% if request.endpoint == 'about' %} aria-current="page"{% endif %}>Про нас</a>
             <a href="{{ url_for('contacts') }}" class="nav-link block text-white py-2 transition duration-300 hover:translate-x-2{% if request.endpoint == 'contacts' %} active{% endif %}"{% if request.endpoint == 'contacts' %} aria-current="page"{% endif %}>Зворотний зв'язок</a>
-            <a href="{{ url_for('admin_feedback') }}" class="nav-link block text-white py-2 transition duration-300 hover:translate-x-2{% if request.endpoint == 'admin_feedback' %} active{% endif %}"{% if request.endpoint == 'admin_feedback' %} aria-current="page"{% endif %}>Адмін</a>
+            <a href="{{ url_for('admin_products') }}" class="nav-link block text-white py-2 transition duration-300 hover:translate-x-2{% if request.endpoint.startswith('admin_') %} active{% endif %}"{% if request.endpoint.startswith('admin_') %} aria-current="page"{% endif %}>Адмін</a>
         </div>
     </nav>
 
